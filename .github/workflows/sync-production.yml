@@ -26,12 +26,19 @@ jobs:
             test -s "$f"
           done
 
+      - name: Apply browser compatibility hotfixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          sed -i 's/qrcode@1\.5\.4\/build\/qrcode\.min\.js/qrcode@1.5.1\/build\/qrcode.min.js/g' index.html
+
       - name: Verify bundle references
         shell: bash
         run: |
           set -euo pipefail
           grep -q '/style.txt' index.html
           for n in 0 1 2 3 4; do grep -q "/app${n}.txt" index.html; done
+          grep -q 'qrcode@1.5.1/build/qrcode.min.js' index.html
           grep -q 'Control Integral' index.html
 
       - name: Commit synchronized production files
@@ -45,5 +52,5 @@ jobs:
             echo 'Production bundle already synchronized.'
             exit 0
           fi
-          git commit -m 'build: sincronizar bundle de producción V6'
+          git commit -m 'fix: corregir carga QR en producción'
           git push
