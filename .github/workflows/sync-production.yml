@@ -26,20 +26,40 @@ jobs:
             test -s "$f"
           done
 
-      - name: Apply browser compatibility hotfixes
+      - name: Build browser-compatible source assets
         shell: bash
         run: |
           set -euo pipefail
-          sed -i 's/qrcode@1\.5\.4\/build\/qrcode\.min\.js/qrcode@1.5.1\/build\/qrcode.min.js/g' index.html
+          mkdir -p assets
+          base64 -d style.txt | gzip -dc > assets/style.css
+          cat app0.txt app1.txt app2.txt app3.txt app4.txt | base64 -d | gzip -dc > assets/app.js
+          test -s assets/style.css
+          test -s assets/app.js
 
-      - name: Verify bundle references
+      - name: Build robust production HTML
         shell: bash
         run: |
           set -euo pipefail
-          grep -q '/style.txt' index.html
-          for n in 0 1 2 3 4; do grep -q "/app${n}.txt" index.html; done
-          grep -q 'qrcode@1.5.1/build/qrcode.min.js' index.html
-          grep -q 'Control Integral' index.html
+          python3 - <<'PY'
+          from pathlib import Path
+          html = Path('index.html').read_text()
+          start = html.find('<script>(async()=>{')
+          if start < 0:
+              raise SystemExit('No se encontró el cargador comprimido')
+          end = html.find('</script>', start)
+          if end < 0:
+              raise SystemExit('No se encontró cierre del cargador')
+          end += len('</script>')
+          tags = '''<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/c7795b8c9h-creator/control-integral-calego@main/assets/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/c7795b8c9h-creator/control-integral-calego@main/assets/app.js"></script>'''
+          html = html[:start] + tags + html[end:]
+          Path('standalone.html').write_text(html)
+          PY
+          grep -q 'qrcode@1.5.1/build/qrcode.min.js' standalone.html
+          ! grep -q 'DecompressionStream' standalone.html
+          grep -q 'assets/app.js' standalone.html
 
       - name: Commit synchronized production files
         shell: bash
@@ -47,10 +67,10 @@ jobs:
           set -euo pipefail
           git config user.name 'CALEGO Production Sync'
           git config user.email 'actions@users.noreply.github.com'
-          git add index.html style.txt app0.txt app1.txt app2.txt app3.txt app4.txt
+          git add index.html style.txt app0.txt app1.txt app2.txt app3.txt app4.txt assets/app.js assets/style.css standalone.html
           if git diff --cached --quiet; then
             echo 'Production bundle already synchronized.'
             exit 0
           fi
-          git commit -m 'fix: corregir carga QR en producción'
+          git commit -m 'fix: generar frontend compatible sin descompresión en navegador'
           git push
