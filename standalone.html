@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#1B3459">
+  <title>CALEGO · Control Integral</title>
+</head>
+<body data-mode="desktop">
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <section id="loginScreen" class="login-screen">
+    <form id="loginForm" class="login-card">
+      <img src="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22320%22%20height=%22100%22%20viewBox=%220%200%20320%20100%22%3E%3Crect%20width=%22320%22%20height=%22100%22%20fill=%22white%22/%3E%3Ctext%20x=%22160%22%20y=%2264%22%20text-anchor=%22middle%22%20font-family=%22Arial,sans-serif%22%20font-size=%2244%22%20font-weight=%22700%22%20fill=%22#1B3459%22%3ECALEGO%3C/text%3E%3C/svg%3E" class="login-logo" alt="CALEGO">
+      <h1>Control Integral</h1>
+      <p>Rondas · máquinas · moldes · evidencias</p>
+      <label>Usuario<input id="loginUser" autocomplete="username" required></label>
+      <label>Clave<input id="loginPass" type="password" autocomplete="current-password" required></label>
+      <button class="btn primary full" type="submit">Ingresar</button>
+      <div id="loginError" class="error"></div>
+    </form>
+  </section>
+
+  <section id="appShell" class="app-shell hidden">
+    <header class="topbar">
+      <button id="menuBtn" class="icon-btn mobile-only" aria-label="Abrir menú">☰</button>
+      <div class="brand"><img src="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22320%22%20height=%22100%22%20viewBox=%220%200%20320%20100%22%3E%3Crect%20width=%22320%22%20height=%22100%22%20fill=%22white%22/%3E%3Ctext%20x=%22160%22%20y=%2264%22%20text-anchor=%22middle%22%20font-family=%22Arial,sans-serif%22%20font-size=%2244%22%20font-weight=%22700%22%20fill=%22#1B3459%22%3ECALEGO%3C/text%3E%3C/svg%3E" alt="CALEGO"><div><strong>Control Integral</strong><small id="syncState">Conectado</small></div></div>
+      <div class="top-actions">
+        <label class="compact">Fecha<input id="workDate" type="date"></label>
+        <label class="compact">Turno<select id="shiftSelect"><option value="1">Turno 1</option><option value="2">Turno 2</option><option value="3">Turno 3</option></select></label>
+        <span id="userChip" class="user-chip"></span>
+        <button id="logoutBtn" class="btn light sm">Salir</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside id="sidebar" class="sidebar">
+        <div class="nav-title">Operación</div>
+        <button class="nav-btn" data-page="checklist">✓ Lista de chequeo</button>
+        <button class="nav-btn" data-page="molds">◉ Control de moldes</button>
+        <div class="nav-title manager-only">Gerencia</div>
+        <button class="nav-btn manager-only" data-page="dashboard">▦ Dashboard</button>
+        <button class="nav-btn manager-only" data-page="observations">! Fallas y soluciones</button>
+        <button class="nav-btn manager-only" data-page="matrix">≡ Matriz maestra</button>
+        <button class="nav-btn manager-only" data-page="qr">▣ Crear / imprimir QR</button>
+        <button class="nav-btn manager-only" data-page="users">♙ Usuarios y permisos</button>
+      </aside>
+
+      <main class="main">
+        <section id="page-dashboard" class="page">
+          <div class="page-head"><div><h2>Dashboard gerencial</h2><p>Qué falta, dónde está la falla y quién debe actuar.</p></div><div class="actions"><button class="btn light" id="refreshDashboard">Actualizar</button><button class="btn primary" id="analyzeBtn">✦ Analizar gestión</button></div></div>
+          <div class="filters"><label>Área<select id="dashboardArea"><option value="all">Todas</option></select></label><label>Responsable<select id="dashboardResponsible"><option value="all">Todos</option></select></label></div>
+          <div id="dashboardKpis" class="kpi-grid"></div>
+          <div class="grid-2"><div class="card"><h3>Gestión por responsable</h3><div id="responsibleTable" class="table-wrap"></div></div><div class="card"><h3>Prioridades</h3><div id="priorityList"></div></div></div>
+          <div class="card"><h3>Máquina × turno</h3><div id="shiftMatrix" class="table-wrap"></div></div>
+          <div class="card"><h3>Control de moldes</h3><div id="moldDashboard" class="table-wrap"></div></div>
+          <div class="card"><div class="page-head"><div><h3>Evidencias recientes</h3><p>Fotos de máquinas y parámetros de la fecha seleccionada.</p></div><button id="refreshEvidence" class="btn light sm">Actualizar evidencias</button></div><div id="evidenceDashboard"></div></div>
+        </section>
+
+        <section id="page-checklist" class="page">
+          <div class="page-head"><div><h2 id="checkTitle">Ronda de chequeo</h2><p id="checkHelp">Máquina → QR → punto → respuesta → siguiente.</p></div></div>
+          <div id="checkManagerView" class="manager-view hidden"></div>
+          <div id="checkResponsibleView" class="responsible-view hidden">
+            <div class="selection-card">
+              <button id="quickScanBtn" class="btn primary quick-scan mobile-only" type="button">▣ Escanear máquina y comenzar</button>
+              <div class="mobile-only quick-or">o elegir manualmente</div>
+              <label>Área<select id="areaSelect"></select></label>
+              <label>Línea<select id="moduleSelect"></select></label>
+              <label>Máquina<select id="machineSelect"></select></label>
+              <button id="startCheckBtn" class="btn primary">Iniciar / continuar ronda</button>
+            </div>
+            <div id="checkFlow"></div>
+          </div>
+        </section>
+
+        <section id="page-molds" class="page">
+          <div class="page-head"><div><h2>Control de moldes</h2><p id="moldHelp">Parámetros reales contra ficha estándar.</p></div></div>
+          <div id="moldManagerView" class="manager-view hidden"></div>
+          <div id="moldResponsibleView" class="responsible-view hidden">
+            <div class="selection-card">
+              <label>Inyectora<select id="moldMachineSelect"></select></label>
+              <label>Molde montado<select id="moldSelect"></select></label>
+              <button id="startMoldBtn" class="btn primary">Confirmar molde e iniciar</button>
+            </div>
+            <div id="moldFlow"></div>
+          </div>
+        </section>
+
+        <section id="page-observations" class="page manager-only-page">
+          <div class="page-head"><div><h2>Fallas y soluciones</h2><p>Observaciones abiertas y acciones correctivas.</p></div><button id="refreshObs" class="btn light">Actualizar</button></div>
+          <div class="filters"><label>Estado<select id="obsStatus"><option value="open">Abiertas</option><option value="closed">Solucionadas</option><option value="all">Todas</option></select></label><label>Buscar<input id="obsSearch" placeholder="Máquina, parámetro, responsable..."></label></div>
+          <div class="card table-wrap"><table class="data-table"><thead><tr><th>Fecha</th><th>Máquina</th><th>Punto</th><th>Resultado</th><th>Falla</th><th>Responsable</th><th>Acción</th></tr></thead><tbody id="obsBody"></tbody></table></div>
+        </section>
+
+        <section id="page-matrix" class="page manager-only-page">
+          <div class="page-head"><div><h2>Matriz maestra</h2><p>Áreas, líneas, máquinas y puntos. Los elementos usados históricamente se desactivan, no se destruyen.</p></div><button id="addAreaBtn" class="btn primary">+ Área</button></div>
+          <div class="card random-control" id="randomSettingsCard"></div>
+          <div id="matrixEditor"></div>
+        </section>
+
+        <section id="page-qr" class="page manager-only-page">
+          <div class="page-head"><div><h2>Crear / imprimir QR</h2><p>Los tokens solo son accesibles por Gerencia.</p></div><div class="actions"><button id="printAllQr" class="btn light">Imprimir todos</button><button id="toggleQrRequired" class="btn primary"></button></div></div>
+          <div id="qrGrid" class="qr-grid"></div>
+          <div class="card qr-audit-card"><div class="page-head"><div><h3>Últimos escaneos</h3><p>Usuario · máquina · fecha · turno · hora · dispositivo.</p></div><button id="refreshQrAudit" class="btn light sm">Actualizar</button></div><div id="qrAuditTable" class="table-wrap"></div></div>
+        </section>
+
+        <section id="page-users" class="page manager-only-page">
+          <div class="page-head"><div><h2>Usuarios y permisos</h2><p>Una tarjeta por persona. Las claves nunca se muestran.</p></div><button id="addUserBtn" class="btn primary">+ Usuario</button></div>
+          <div id="userCards" class="user-cards"></div>
+        </section>
+      </main>
+    </div>
+  </section>
+
+  <dialog id="qrDialog" class="modal-dialog">
+    <form method="dialog" class="dialog-head"><strong>Escanear QR de máquina</strong><button class="icon-btn">✕</button></form>
+    <video id="qrVideo" class="qr-video" playsinline muted></video>
+    <div id="qrScannerMsg" class="notice"></div>
+    <div class="divider"></div>
+    <label>Alternativa manual<input id="qrManual" placeholder="CALEGO_MACHINE:INY-1:..."></label>
+    <button id="qrManualBtn" class="btn primary full" type="button">Validar código</button>
+  </dialog>
+
+  <dialog id="photoDialog" class="modal-dialog small-dialog">
+    <form method="dialog" class="dialog-head"><strong>Evidencia fotográfica</strong><button class="icon-btn">✕</button></form>
+    <input id="photoInput" type="file" accept="image/*" capture="environment">
+    <img id="photoPreview" class="photo-preview hidden" alt="Vista previa">
+    <p id="photoHelp" class="notice"></p>
+    <button id="uploadPhotoBtn" class="btn primary full" type="button">Guardar fotografía</button>
+  </dialog>
+
+  <dialog id="analysisDialog" class="modal-dialog"><form method="dialog" class="dialog-head"><strong>Análisis de gestión</strong><button class="icon-btn">✕</button></form><div id="analysisContent"></div></dialog>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/c7795b8c9h-creator/control-integral-calego@main/assets/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/c7795b8c9h-creator/control-integral-calego@main/assets/app.js"></script>
+</body>
+</html>
