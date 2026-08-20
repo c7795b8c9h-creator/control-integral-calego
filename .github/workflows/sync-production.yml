@@ -1,0 +1,49 @@
+name: Sync production bundle
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/sync-production.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download current production bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://control-integral-calego.vercel.app'
+          for f in index.html style.txt app0.txt app1.txt app2.txt app3.txt app4.txt; do
+            curl --fail --silent --show-error --location "$base/$f" --output "$f"
+            test -s "$f"
+          done
+
+      - name: Verify bundle references
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '/style.txt' index.html
+          for n in 0 1 2 3 4; do grep -q "/app${n}.txt" index.html; done
+          grep -q 'Control Integral' index.html
+
+      - name: Commit synchronized production files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'CALEGO Production Sync'
+          git config user.email 'actions@users.noreply.github.com'
+          git add index.html style.txt app0.txt app1.txt app2.txt app3.txt app4.txt
+          if git diff --cached --quiet; then
+            echo 'Production bundle already synchronized.'
+            exit 0
+          fi
+          git commit -m 'build: sincronizar bundle de producción V6'
+          git push
