@@ -1,0 +1,45 @@
+name: Build browser hotfix
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/build-browser-hotfix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate direct browser assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets
+          base64 -d style.txt | gzip -dc > assets/style.css
+          cat app0.txt app1.txt app2.txt app3.txt app4.txt | base64 -d | gzip -dc > assets/app.js
+          python3 - <<'PY'
+          from pathlib import Path
+          html=Path('index.html').read_text()
+          start=html.find('<script>(async()=>{')
+          end=html.find('</script>',start)+len('</script>')
+          if start < 0 or end < len('</script>'): raise SystemExit('loader not found')
+          tags='''<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/c7795b8c9h-creator/control-integral-calego@main/assets/style.css">\n<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.min.js"></script>\n<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>\n<script src="https://cdn.jsdelivr.net/gh/c7795b8c9h-creator/control-integral-calego@main/assets/app.js"></script>'''
+          Path('standalone.html').write_text(html[:start]+tags+html[end:])
+          PY
+          test -s assets/style.css
+          test -s assets/app.js
+          grep -q 'qrcode@1.5.1/build/qrcode.min.js' standalone.html
+          ! grep -q 'DecompressionStream' standalone.html
+      - name: Commit hotfix assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'CALEGO Browser Hotfix'
+          git config user.email 'actions@users.noreply.github.com'
+          git add assets/app.js assets/style.css standalone.html
+          git commit -m 'fix: publicar frontend compatible sin loader comprimido'
+          git push
