@@ -20,6 +20,7 @@ jobs:
           node --check assets/preview-dashboard-v7.js
           node --check assets/preview-dashboard-v7-1.js
           node --check assets/preview-dashboard-v7-2.js
+          node --check assets/preview-dashboard-v7-5.js
           node --check assets/preview-flow-v7.js
           node --check assets/preview-matrix-v7-3.js
           node --check assets/preview-matrix-v7-4.js
@@ -35,7 +36,9 @@ jobs:
           grep -q 'Máquinas productivas' assets/preview-dashboard-v7-1.js
           grep -q 'Todos los turnos' assets/preview-dashboard-v7-2.js
           grep -q 'Rondas esperadas' assets/preview-dashboard-v7-2.js
-          grep -q 'Colapsibles' assets/preview-dashboard-v7-2.js
+          grep -q 'strictDashboardScope' assets/preview-dashboard-v7-5.js
+          grep -q 'Aplicando filtro a evidencias' assets/preview-dashboard-v7-5.js
+          grep -q 'El análisis respeta exactamente' assets/preview-dashboard-v7-5.js
           grep -q 'Eliminar área' assets/preview-matrix-v7-3.js
           grep -q 'Ver eliminadas' assets/preview-matrix-v7-3.js
           grep -q 'Todas' assets/preview-matrix-v7-4.js
