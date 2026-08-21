@@ -26,6 +26,7 @@ jobs:
           node --check assets/preview-matrix-v7-4.js
           node --check assets/preview-curation-v7-6.js
           node --check assets/preview-architecture-v7-7.js
+          node --check assets/preview-performance-v7-8.js
           node --check scripts/build-lite-html.mjs
       - name: Check preview files
         run: |
@@ -41,9 +42,11 @@ jobs:
           grep -q 'strictDashboardScope' assets/preview-dashboard-v7-5.js
           grep -q 'Puntos / equipos activos' assets/preview-curation-v7-6.js
           grep -q '7.7-lite' assets/preview-architecture-v7-7.js
-          grep -q 'loadJsQr' assets/preview-architecture-v7-7.js
-          grep -q 'preview-architecture-v7-7.js' preview.html
+          grep -q '7.8-lite' assets/preview-performance-v7-8.js
+          grep -q 'fetchObservationAnswers' assets/preview-performance-v7-8.js
+          grep -q 'loadQrCodeGenerator' assets/preview-performance-v7-8.js
           test -s docs/ARCHITECTURE_V7_LITE.md
+          test -s docs/PERFORMANCE_MIGRATION_PROPOSED.sql
   deploy_preview:
     if: github.event_name != 'pull_request'
     needs: check
