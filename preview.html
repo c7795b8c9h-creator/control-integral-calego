@@ -4,21 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#1B3459">
-  <title>CALEGO · Control Integral · Preview V7.6</title>
+  <title>CALEGO · Control Integral · Preview V7.7 Lite</title>
   <style>body{margin:0;font-family:Arial,sans-serif;background:#f4f8fc;color:#1B3459}.boot{min-height:100vh;display:grid;place-items:center;padding:24px;text-align:center}.boot b{display:block;font-size:22px}.boot small{display:block;margin-top:8px;color:#68778c}</style>
 </head>
 <body>
-  <div class="boot"><div><b>CALEGO · Control Integral</b><small>Cargando PREVIEW V7.6 · curaduría integral…</small></div></div>
+  <div class="boot"><div><b>CALEGO · Control Integral</b><small>Cargando PREVIEW V7.7 Lite…</small></div></div>
   <script>
     (async()=>{
       try{
         const base='https://raw.githubusercontent.com/c7795b8c9h-creator/control-integral-calego/main/standalone.html';
         const r=await fetch(base,{cache:'no-store'});if(!r.ok)throw new Error('No se pudo cargar la base ('+r.status+')');
         let h=await r.text();
-        const ref='c9c66fddd9908e7ac7f3e8626e71f5eebd920269';
+        const ref='532375a6941d5a73d80b79cd8d05de6d28d17027';
         const cdn=`https://cdn.jsdelivr.net/gh/c7795b8c9h-creator/control-integral-calego@${ref}/assets/`;
-        const extra=`<link rel="stylesheet" href="${cdn}preview-v7.css"><link rel="stylesheet" href="${cdn}preview-dashboard-v7-1.css"><link rel="stylesheet" href="${cdn}preview-matrix-v7-3.css"><link rel="stylesheet" href="${cdn}preview-matrix-v7-4.css"><link rel="stylesheet" href="${cdn}preview-curation-v7-6.css"><script src="${cdn}preview-photo-v7.js"><\/script><script src="${cdn}preview-dashboard-v7.js"><\/script><script src="${cdn}preview-dashboard-v7-1.js"><\/script><script src="${cdn}preview-dashboard-v7-2.js"><\/script><script src="${cdn}preview-dashboard-v7-5.js"><\/script><script src="${cdn}preview-flow-v7.js"><\/script><script src="${cdn}preview-matrix-v7-3.js"><\/script><script src="${cdn}preview-matrix-v7-4.js"><\/script><script src="${cdn}preview-curation-v7-6.js"><\/script>`;
-        h=h.replace('</body>',extra+'</body>').replace('<title>CALEGO · Control Integral</title>','<title>CALEGO · Control Integral · Preview V7.6</title>');
+        const extra=`<link rel="stylesheet" href="${cdn}preview-v7.css"><link rel="stylesheet" href="${cdn}preview-dashboard-v7-1.css"><link rel="stylesheet" href="${cdn}preview-matrix-v7-3.css"><link rel="stylesheet" href="${cdn}preview-matrix-v7-4.css"><link rel="stylesheet" href="${cdn}preview-curation-v7-6.css"><link rel="stylesheet" href="${cdn}preview-architecture-v7-7.css"><script src="${cdn}preview-photo-v7.js"><\/script><script src="${cdn}preview-dashboard-v7.js"><\/script><script src="${cdn}preview-dashboard-v7-1.js"><\/script><script src="${cdn}preview-dashboard-v7-2.js"><\/script><script src="${cdn}preview-dashboard-v7-5.js"><\/script><script src="${cdn}preview-flow-v7.js"><\/script><script src="${cdn}preview-matrix-v7-3.js"><\/script><script src="${cdn}preview-matrix-v7-4.js"><\/script><script src="${cdn}preview-curation-v7-6.js"><\/script><script src="${cdn}preview-architecture-v7-7.js"><\/script>`;
+        h=h.replace('</body>',extra+'</body>').replace('<title>CALEGO · Control Integral</title>','<title>CALEGO · Control Integral · Preview V7.7 Lite</title>');
         document.open();document.write(h);document.close();
       }catch(e){document.body.innerHTML='<div class="boot"><div><b>No se pudo abrir la preview</b><small>'+String(e.message||e)+'</small></div></div>'}
     })();
