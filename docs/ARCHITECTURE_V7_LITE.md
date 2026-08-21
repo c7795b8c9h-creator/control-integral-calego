@@ -6,13 +6,23 @@ Keep the operational app fast, predictable and small on desktop and mobile, whil
 ## Runtime shape
 Production target is a static Vercel deployment with same-origin immutable assets:
 - `index.html` — app shell, no dynamic GitHub bootstrap.
-- `app.v7.min.css` — all application CSS consolidated and minified.
-- `app.v7.min.js` — base app + auth hotfix + reviewed V7 behavior consolidated and minified.
-- `vendor/supabase.min.js` — exact pinned Supabase browser client.
-- `vendor/qrcode.min.js` — exact pinned QR generator.
-- `vendor/jsqr.min.js` — QR reader fallback loaded only on browsers without BarcodeDetector.
+- `app.<hash>.min.css` — all application CSS consolidated, minified and content-versioned.
+- `app.<hash>.min.js` — base app + auth + reviewed V7 behavior consolidated, minified and content-versioned.
+- `vendor/supabase-2.49.8.min.js` — exact pinned Supabase browser client.
+- `vendor/qrcode-1.5.1.min.js` — exact pinned QR generator.
+- `vendor/jsqr-1.4.0.min.js` — QR reader fallback loaded only on browsers without BarcodeDetector.
 
-No service worker is used. This intentionally avoids stale offline bundles and version loops. Vercel should cache hashed/versioned static assets as immutable and serve `index.html` with revalidation/no-cache.
+No service worker is used. This intentionally avoids stale offline bundles and version loops. Vercel should cache content-hashed/versioned static assets as immutable and serve `index.html` with revalidation/no-cache.
+
+## Measured build
+Current V7 Lite build:
+- HTML: ~10.4 KB raw / ~3.1 KB gzip.
+- CSS: ~31.3 KB raw / ~6.8 KB gzip.
+- App JavaScript: ~164.7 KB raw / ~45.5 KB gzip.
+- Supabase browser client: ~116.4 KB raw / ~30.9 KB gzip.
+- QR generator: ~23.7 KB raw / ~9.1 KB gzip.
+- Normal initial code payload: about 95 KB gzip total, excluding the HTML framing difference and excluding jsQR fallback.
+- jsQR fallback (~130 KB raw) is lazy-loaded only when native `BarcodeDetector` is unavailable.
 
 ## Removed from the final architecture
 - Runtime fetch of `raw.githubusercontent.com`.
@@ -37,6 +47,7 @@ No service worker is used. This intentionally avoids stale offline bundles and v
 - QR scanning uses native BarcodeDetector when available and lazy-loads jsQR only as fallback.
 - Reduced-motion preference is honored.
 - No service-worker/offline writes are attempted because operational records must reach Supabase.
+- CI smoke tests exercise mobile and desktop shells in Chromium, Firefox and WebKit before publication.
 
 ## Backend performance review
 Supabase advisor currently reports:
