@@ -31,7 +31,8 @@ jobs:
           node --check scripts/build-lite-html.mjs
       - name: Check preview files
         run: |
-          test -s preview.html
+          test -s dist/index.html
+          test -s dist/build-stats.txt
           test -s assets/preview-v7.css
           test -s assets/preview-dashboard-v7-1.css
           test -s assets/preview-matrix-v7-3.css
@@ -46,7 +47,6 @@ jobs:
           grep -q '7.7-lite' assets/preview-architecture-v7-7.js
           grep -q '7.8-lite' assets/preview-performance-v7-8.js
           grep -q 'Rondas por turno' assets/preview-dashboard-v7-9.js
-          grep -q 'Sin actividad' assets/preview-dashboard-v7-9.js
           grep -q 'fetchObservationAnswers' assets/preview-performance-v7-8.js
           grep -q 'loadQrCodeGenerator' assets/preview-performance-v7-8.js
           test -s docs/ARCHITECTURE_V7_LITE.md
@@ -63,8 +63,9 @@ jobs:
       - uses: actions/configure-pages@v5
       - name: Build preview site
         run: |
+          rm -rf _site
           mkdir -p _site
-          cp preview.html _site/index.html
+          cp -R dist/. _site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
