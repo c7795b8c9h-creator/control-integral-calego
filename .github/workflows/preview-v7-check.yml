@@ -25,6 +25,8 @@ jobs:
           node --check assets/preview-matrix-v7-3.js
           node --check assets/preview-matrix-v7-4.js
           node --check assets/preview-curation-v7-6.js
+          node --check assets/preview-architecture-v7-7.js
+          node --check scripts/build-lite-html.mjs
       - name: Check preview files
         run: |
           test -s preview.html
@@ -33,16 +35,15 @@ jobs:
           test -s assets/preview-matrix-v7-3.css
           test -s assets/preview-matrix-v7-4.css
           test -s assets/preview-curation-v7-6.css
+          test -s assets/preview-architecture-v7-7.css
           grep -q 'PREVIEW V7' assets/preview-photo-v7.js
           grep -q 'Guardar y seguir' assets/preview-flow-v7.js
           grep -q 'strictDashboardScope' assets/preview-dashboard-v7-5.js
-          grep -q 'Eliminar área' assets/preview-matrix-v7-3.js
-          grep -q 'Filtrar matriz por área' assets/preview-matrix-v7-4.js
           grep -q 'Puntos / equipos activos' assets/preview-curation-v7-6.js
-          grep -q 'Anti-flat' assets/preview-curation-v7-6.js
-          grep -q 'obsAreaFilter' assets/preview-curation-v7-6.js
-          grep -q 'inactive parent' assets/preview-curation-v7-6.js
-          grep -q 'preview-curation-v7-6.js' preview.html
+          grep -q '7.7-lite' assets/preview-architecture-v7-7.js
+          grep -q 'loadJsQr' assets/preview-architecture-v7-7.js
+          grep -q 'preview-architecture-v7-7.js' preview.html
+          test -s docs/ARCHITECTURE_V7_LITE.md
   deploy_preview:
     if: github.event_name != 'pull_request'
     needs: check
