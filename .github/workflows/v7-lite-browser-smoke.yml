@@ -1,0 +1,26 @@
+name: V7 Lite browser smoke
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser
+        run: npx --yes playwright@1.55.0 install --with-deps ${{ matrix.browser }}
+      - name: Start static server
+        run: |
+          npx --yes http-server@14.1.1 dist -p 4173 -c-1 > /tmp/v7-http.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0; sleep 1; done
+          cat /tmp/v7-http.log
+          exit 1
+      - name: Run smoke tests
+        env:
+          PLAYWRIGHT_BROWSER: ${{ matrix.browser }}
+        run: npx --yes playwright@1.55.0 test tests/v7-lite.spec.js --browser=${{ matrix.browser }} --reporter=line
