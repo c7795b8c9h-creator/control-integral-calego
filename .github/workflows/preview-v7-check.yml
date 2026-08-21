@@ -24,6 +24,7 @@ jobs:
           node --check assets/preview-flow-v7.js
           node --check assets/preview-matrix-v7-3.js
           node --check assets/preview-matrix-v7-4.js
+          node --check assets/preview-curation-v7-6.js
       - name: Check preview files
         run: |
           test -s preview.html
@@ -31,18 +32,17 @@ jobs:
           test -s assets/preview-dashboard-v7-1.css
           test -s assets/preview-matrix-v7-3.css
           test -s assets/preview-matrix-v7-4.css
+          test -s assets/preview-curation-v7-6.css
           grep -q 'PREVIEW V7' assets/preview-photo-v7.js
           grep -q 'Guardar y seguir' assets/preview-flow-v7.js
-          grep -q 'Máquinas productivas' assets/preview-dashboard-v7-1.js
-          grep -q 'Todos los turnos' assets/preview-dashboard-v7-2.js
-          grep -q 'Rondas esperadas' assets/preview-dashboard-v7-2.js
           grep -q 'strictDashboardScope' assets/preview-dashboard-v7-5.js
-          grep -q 'Aplicando filtro a evidencias' assets/preview-dashboard-v7-5.js
-          grep -q 'El análisis respeta exactamente' assets/preview-dashboard-v7-5.js
           grep -q 'Eliminar área' assets/preview-matrix-v7-3.js
-          grep -q 'Ver eliminadas' assets/preview-matrix-v7-3.js
-          grep -q 'Todas' assets/preview-matrix-v7-4.js
           grep -q 'Filtrar matriz por área' assets/preview-matrix-v7-4.js
+          grep -q 'Puntos / equipos activos' assets/preview-curation-v7-6.js
+          grep -q 'Anti-flat' assets/preview-curation-v7-6.js
+          grep -q 'obsAreaFilter' assets/preview-curation-v7-6.js
+          grep -q 'inactive parent' assets/preview-curation-v7-6.js
+          grep -q 'preview-curation-v7-6.js' preview.html
   deploy_preview:
     if: github.event_name != 'pull_request'
     needs: check
