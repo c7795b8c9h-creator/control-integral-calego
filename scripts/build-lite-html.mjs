@@ -1,13 +1,15 @@
 import fs from 'node:fs';
 
+const appJs=process.env.APP_JS||'app.v7.min.js';
+const appCss=process.env.APP_CSS||'app.v7.min.css';
 let html=fs.readFileSync('standalone.html','utf8');
 html=html
-  .replace(/<link rel="stylesheet" href="[^"]*assets\/style\.css">/, '<link rel="stylesheet" href="./app.v7.min.css">')
-  .replace(/<script src="[^"]*@supabase\/supabase-js@[^"]*"><\/script>/, '<script src="./vendor/supabase.min.js"></script>')
-  .replace(/<script src="[^"]*qrcode@[^"]*"><\/script>/, '<script src="./vendor/qrcode.min.js"></script>')
-  .replace(/<script src="[^"]*assets\/app\.js"><\/script>/, '<script src="./app.v7.min.js"></script>')
+  .replace(/<link rel="stylesheet" href="[^"]*assets\/style\.css">/, '')
+  .replace(/<script src="[^"]*@supabase\/supabase-js@[^"]*"><\/script>/, '<script src="./vendor/supabase-2.49.8.min.js"></script>')
+  .replace(/<script src="[^"]*qrcode@[^"]*"><\/script>/, '<script src="./vendor/qrcode-1.5.1.min.js"></script>')
+  .replace(/<script src="[^"]*assets\/app\.js"><\/script>/, `<script src="./${appJs}"></script>`)
   .replace(/\s*<script src="[^"]*assets\/admin-hotfix\.js"><\/script>/, '')
   .replace('<title>CALEGO · Control Integral</title>','<title>CALEGO · Control Integral · V7 Lite</title>')
-  .replace('</head>','  <meta name="color-scheme" content="light">\n  <meta name="format-detection" content="telephone=no">\n</head>');
+  .replace('</head>',`  <meta name="color-scheme" content="light">\n  <meta name="format-detection" content="telephone=no">\n  <link rel="stylesheet" href="./${appCss}">\n</head>`);
 fs.mkdirSync('dist',{recursive:true});
 fs.writeFileSync('dist/index.html',html);
