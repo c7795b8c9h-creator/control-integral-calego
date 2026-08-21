@@ -28,7 +28,8 @@ jobs:
             assets/preview-matrix-v7-4.js \
             assets/preview-curation-v7-6.js \
             assets/preview-architecture-v7-7.js \
-            assets/preview-performance-v7-8.js > .build/app.bundle.js
+            assets/preview-performance-v7-8.js \
+            assets/preview-dashboard-v7-9.js > .build/app.bundle.js
           cat \
             assets/style.css \
             assets/preview-v7.css \
@@ -36,7 +37,8 @@ jobs:
             assets/preview-matrix-v7-3.css \
             assets/preview-matrix-v7-4.css \
             assets/preview-curation-v7-6.css \
-            assets/preview-architecture-v7-7.css > .build/app.bundle.css
+            assets/preview-architecture-v7-7.css \
+            assets/preview-dashboard-v7-9.css > .build/app.bundle.css
           npx --yes esbuild@0.25.9 .build/app.bundle.js --minify --target=es2019 --charset=utf8 --outfile=.build/app.min.js
           npx --yes esbuild@0.25.9 .build/app.bundle.css --minify --outfile=.build/app.min.css
           JS_HASH=$(sha256sum .build/app.min.js | cut -c1-10)
@@ -63,6 +65,8 @@ jobs:
           grep -q './vendor/supabase-2.49.8.min.js' dist/index.html
           ! grep -q 'qrcode-1.5.1.min.js' dist/index.html
           grep -q '7.8-lite' "dist/$APP_JS"
+          grep -q 'Rondas por turno' "dist/$APP_JS"
+          grep -q 'No se multiplican las máquinas del supervisor por tres turnos' "dist/$APP_JS"
           grep -q 'qrcode-1.5.1.min.js' "dist/$APP_JS"
           test -s dist/vendor/qrcode-1.5.1.min.js
           test -s dist/vendor/jsqr-1.4.0.min.js
@@ -74,7 +78,7 @@ jobs:
           APP_JS=$(cat .build/app-js-name)
           APP_CSS=$(cat .build/app-css-name)
           {
-            echo 'CALEGO Control Integral V7.8 Lite build sizes'
+            echo 'CALEGO Control Integral V7.9 Lite build sizes'
             wc -c dist/index.html "dist/$APP_CSS" "dist/$APP_JS" dist/vendor/supabase-2.49.8.min.js dist/vendor/qrcode-1.5.1.min.js dist/vendor/jsqr-1.4.0.min.js
             echo ''
             echo 'Initial-load gzip estimates (bytes)'
