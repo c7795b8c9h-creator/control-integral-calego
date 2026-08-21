@@ -15,7 +15,7 @@
         const base='https://raw.githubusercontent.com/c7795b8c9h-creator/control-integral-calego/main/standalone.html';
         const r=await fetch(base,{cache:'no-store'});if(!r.ok)throw new Error('No se pudo cargar la base ('+r.status+')');
         let h=await r.text();
-        const ref='dcdf1d260ea01f383deaaff7b0ae2aa112f603f2';
+        const ref='c627f22f7053618bc0db3ca82661719ba3438560';
         const cdn=`https://cdn.jsdelivr.net/gh/c7795b8c9h-creator/control-integral-calego@${ref}/assets/`;
         const extra=`<link rel="stylesheet" href="${cdn}preview-v7.css"><link rel="stylesheet" href="${cdn}preview-dashboard-v7-1.css"><script src="${cdn}preview-photo-v7.js"><\/script><script src="${cdn}preview-dashboard-v7.js"><\/script><script src="${cdn}preview-dashboard-v7-1.js"><\/script><script src="${cdn}preview-dashboard-v7-2.js"><\/script><script src="${cdn}preview-flow-v7.js"><\/script>`;
         h=h.replace('</body>',extra+'</body>').replace('<title>CALEGO · Control Integral</title>','<title>CALEGO · Control Integral · Preview V7.2</title>');
