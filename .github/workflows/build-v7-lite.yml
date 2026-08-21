@@ -13,6 +13,7 @@ jobs:
       - name: Build consolidated assets
         run: |
           set -e
+          rm -rf dist .build
           mkdir -p .build dist/vendor
           cat \
             assets/app.js \
@@ -35,39 +36,57 @@ jobs:
             assets/preview-matrix-v7-4.css \
             assets/preview-curation-v7-6.css \
             assets/preview-architecture-v7-7.css > .build/app.bundle.css
-          npx --yes esbuild@0.25.9 .build/app.bundle.js --minify --target=es2019 --charset=utf8 --outfile=dist/app.v7.min.js
-          npx --yes esbuild@0.25.9 .build/app.bundle.css --minify --outfile=dist/app.v7.min.css
-          curl -fsSL https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.min.js -o dist/vendor/supabase.min.js
-          curl -fsSL https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js -o dist/vendor/qrcode.min.js
+          npx --yes esbuild@0.25.9 .build/app.bundle.js --minify --target=es2019 --charset=utf8 --outfile=.build/app.min.js
+          npx --yes esbuild@0.25.9 .build/app.bundle.css --minify --outfile=.build/app.min.css
+          JS_HASH=$(sha256sum .build/app.min.js | cut -c1-10)
+          CSS_HASH=$(sha256sum .build/app.min.css | cut -c1-10)
+          APP_JS="app.${JS_HASH}.min.js"
+          APP_CSS="app.${CSS_HASH}.min.css"
+          mv .build/app.min.js "dist/$APP_JS"
+          mv .build/app.min.css "dist/$APP_CSS"
+          curl -fsSL https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.min.js -o dist/vendor/supabase-2.49.8.min.js
+          curl -fsSL https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js -o dist/vendor/qrcode-1.5.1.min.js
           curl -fsSL https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js -o .build/jsqr.js
-          npx --yes esbuild@0.25.9 .build/jsqr.js --minify --target=es2019 --outfile=dist/vendor/jsqr.min.js
-          node scripts/build-lite-html.mjs
+          npx --yes esbuild@0.25.9 .build/jsqr.js --minify --target=es2019 --outfile=dist/vendor/jsqr-1.4.0.min.js
+          APP_JS="$APP_JS" APP_CSS="$APP_CSS" node scripts/build-lite-html.mjs
+          printf '%s\n' "$APP_JS" > .build/app-js-name
+          printf '%s\n' "$APP_CSS" > .build/app-css-name
       - name: Validate Lite build
         run: |
           set -e
-          node --check dist/app.v7.min.js
-          grep -q './app.v7.min.js' dist/index.html
-          grep -q './app.v7.min.css' dist/index.html
-          grep -q './vendor/supabase.min.js' dist/index.html
-          grep -q '7.7-lite' dist/app.v7.min.js
-          test -s dist/vendor/jsqr.min.js
+          APP_JS=$(cat .build/app-js-name)
+          APP_CSS=$(cat .build/app-css-name)
+          node --check "dist/$APP_JS"
+          grep -q "./$APP_JS" dist/index.html
+          grep -q "./$APP_CSS" dist/index.html
+          grep -q './vendor/supabase-2.49.8.min.js' dist/index.html
+          grep -q './vendor/qrcode-1.5.1.min.js' dist/index.html
+          grep -q '7.7-lite' "dist/$APP_JS"
+          test -s dist/vendor/jsqr-1.4.0.min.js
+          ! grep -q 'raw.githubusercontent.com' dist/index.html
+          ! grep -q 'cdn.jsdelivr.net' dist/index.html
       - name: Build size report
         run: |
+          set -e
+          APP_JS=$(cat .build/app-js-name)
+          APP_CSS=$(cat .build/app-css-name)
           {
             echo 'CALEGO Control Integral V7 Lite build sizes'
-            wc -c dist/index.html dist/app.v7.min.css dist/app.v7.min.js dist/vendor/supabase.min.js dist/vendor/qrcode.min.js dist/vendor/jsqr.min.js
+            wc -c dist/index.html "dist/$APP_CSS" "dist/$APP_JS" dist/vendor/supabase-2.49.8.min.js dist/vendor/qrcode-1.5.1.min.js dist/vendor/jsqr-1.4.0.min.js
             echo ''
             echo 'Gzip estimates (bytes)'
-            for f in dist/index.html dist/app.v7.min.css dist/app.v7.min.js dist/vendor/supabase.min.js dist/vendor/qrcode.min.js; do printf '%s ' "$f"; gzip -9 -c "$f" | wc -c; done
-            echo 'jsQR is lazy-loaded and excluded from normal initial load.'
+            for f in dist/index.html "dist/$APP_CSS" "dist/$APP_JS" dist/vendor/supabase-2.49.8.min.js dist/vendor/qrcode-1.5.1.min.js; do printf '%s ' "$f"; gzip -9 -c "$f" | wc -c; done
+            echo 'jsQR 1.4.0 is lazy-loaded and excluded from normal initial load.'
+            echo "JS_ASSET=$APP_JS"
+            echo "CSS_ASSET=$APP_CSS"
           } > dist/build-stats.txt
           cat dist/build-stats.txt
       - name: Commit generated Lite bundle
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add dist
+          git add -A dist
           if ! git diff --cached --quiet; then
-            git commit -m 'build: refresh V7 Lite bundle [skip ci]'
+            git commit -m 'build: refresh V7 Lite hashed bundle [skip ci]'
             git push
           fi
