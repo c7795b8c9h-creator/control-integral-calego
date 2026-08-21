@@ -19,6 +19,7 @@ jobs:
           node --check assets/preview-photo-v7.js
           node --check assets/preview-dashboard-v7.js
           node --check assets/preview-dashboard-v7-1.js
+          node --check assets/preview-dashboard-v7-2.js
           node --check assets/preview-flow-v7.js
       - name: Check preview files
         run: |
@@ -28,7 +29,9 @@ jobs:
           grep -q 'PREVIEW V7' assets/preview-photo-v7.js
           grep -q 'Guardar y seguir' assets/preview-flow-v7.js
           grep -q 'Máquinas productivas' assets/preview-dashboard-v7-1.js
-          grep -q 'Colapsibles' assets/preview-dashboard-v7-1.js
+          grep -q 'Todos los turnos' assets/preview-dashboard-v7-2.js
+          grep -q 'Rondas esperadas' assets/preview-dashboard-v7-2.js
+          grep -q 'Colapsibles' assets/preview-dashboard-v7-2.js
   deploy_preview:
     if: github.event_name != 'pull_request'
     needs: check
