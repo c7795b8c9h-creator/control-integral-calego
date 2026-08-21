@@ -6,7 +6,7 @@ let html=fs.readFileSync('standalone.html','utf8');
 html=html
   .replace(/<link rel="stylesheet" href="[^"]*assets\/style\.css">/, '')
   .replace(/<script src="[^"]*@supabase\/supabase-js@[^"]*"><\/script>/, '<script src="./vendor/supabase-2.49.8.min.js"></script>')
-  .replace(/<script src="[^"]*qrcode@[^"]*"><\/script>/, '<script src="./vendor/qrcode-1.5.1.min.js"></script>')
+  .replace(/\s*<script src="[^"]*qrcode@[^"]*"><\/script>/, '')
   .replace(/<script src="[^"]*assets\/app\.js"><\/script>/, `<script src="./${appJs}"></script>`)
   .replace(/\s*<script src="[^"]*assets\/admin-hotfix\.js"><\/script>/, '')
   .replace('<title>CALEGO · Control Integral</title>','<title>CALEGO · Control Integral · V7 Lite</title>')
