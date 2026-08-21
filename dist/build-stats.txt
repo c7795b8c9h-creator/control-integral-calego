@@ -1,0 +1,16 @@
+CALEGO Control Integral V7 Lite build sizes
+ 10389 dist/index.html
+ 31291 dist/app.v7.min.css
+164667 dist/app.v7.min.js
+116378 dist/vendor/supabase.min.js
+ 23738 dist/vendor/qrcode.min.js
+130478 dist/vendor/jsqr.min.js
+476941 total
+
+Gzip estimates (bytes)
+dist/index.html 3061
+dist/app.v7.min.css 6828
+dist/app.v7.min.js 45480
+dist/vendor/supabase.min.js 30932
+dist/vendor/qrcode.min.js 9063
+jsQR is lazy-loaded and excluded from normal initial load.
