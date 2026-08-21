@@ -12,8 +12,12 @@ jobs:
         browser: [chromium, firefox, webkit]
     steps:
       - uses: actions/checkout@v4
+      - name: Install Playwright test runner
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save @playwright/test@1.55.0
       - name: Install browser
-        run: npx --yes @playwright/test@1.55.0 install --with-deps ${{ matrix.browser }}
+        run: npx playwright install --with-deps ${{ matrix.browser }}
       - name: Start static server
         run: |
           npx --yes http-server@14.1.1 dist -p 4173 -c-1 > /tmp/v7-http.log 2>&1 &
@@ -21,4 +25,4 @@ jobs:
           cat /tmp/v7-http.log
           exit 1
       - name: Run smoke tests
-        run: npx --yes @playwright/test@1.55.0 test tests/v7-lite.spec.js --browser=${{ matrix.browser }} --reporter=line
+        run: npx playwright test tests/v7-lite.spec.js --browser=${{ matrix.browser }} --reporter=line
