@@ -1,0 +1,100 @@
+name: Build V7 Lite
+on:
+  push:
+    branches: [preview-v7]
+permissions:
+  contents: write
+jobs:
+  build:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build consolidated assets
+        run: |
+          set -e
+          rm -rf dist .build
+          mkdir -p .build dist/vendor
+          cat \
+            assets/app.js \
+            assets/admin-hotfix.js \
+            assets/preview-photo-v7.js \
+            assets/preview-dashboard-v7.js \
+            assets/preview-dashboard-v7-1.js \
+            assets/preview-dashboard-v7-2.js \
+            assets/preview-dashboard-v7-5.js \
+            assets/preview-flow-v7.js \
+            assets/preview-matrix-v7-3.js \
+            assets/preview-matrix-v7-4.js \
+            assets/preview-curation-v7-6.js \
+            assets/preview-architecture-v7-7.js \
+            assets/preview-performance-v7-8.js \
+            assets/preview-dashboard-v7-9.js > .build/app.bundle.js
+          cat \
+            assets/style.css \
+            assets/preview-v7.css \
+            assets/preview-dashboard-v7-1.css \
+            assets/preview-matrix-v7-3.css \
+            assets/preview-matrix-v7-4.css \
+            assets/preview-curation-v7-6.css \
+            assets/preview-architecture-v7-7.css \
+            assets/preview-dashboard-v7-9.css > .build/app.bundle.css
+          npx --yes esbuild@0.25.9 .build/app.bundle.js --minify --target=es2019 --charset=utf8 --outfile=.build/app.min.js
+          npx --yes esbuild@0.25.9 .build/app.bundle.css --minify --outfile=.build/app.min.css
+          JS_HASH=$(sha256sum .build/app.min.js | cut -c1-10)
+          CSS_HASH=$(sha256sum .build/app.min.css | cut -c1-10)
+          APP_JS="app.${JS_HASH}.min.js"
+          APP_CSS="app.${CSS_HASH}.min.css"
+          mv .build/app.min.js "dist/$APP_JS"
+          mv .build/app.min.css "dist/$APP_CSS"
+          curl -fsSL https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.min.js -o dist/vendor/supabase-2.49.8.min.js
+          curl -fsSL https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js -o dist/vendor/qrcode-1.5.1.min.js
+          curl -fsSL https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js -o .build/jsqr.js
+          npx --yes esbuild@0.25.9 .build/jsqr.js --minify --target=es2019 --outfile=dist/vendor/jsqr-1.4.0.min.js
+          APP_JS="$APP_JS" APP_CSS="$APP_CSS" node scripts/build-lite-html.mjs
+          printf '%s\n' "$APP_JS" > .build/app-js-name
+          printf '%s\n' "$APP_CSS" > .build/app-css-name
+      - name: Validate Lite build
+        run: |
+          set -e
+          APP_JS=$(cat .build/app-js-name)
+          APP_CSS=$(cat .build/app-css-name)
+          node --check "dist/$APP_JS"
+          grep -q "./$APP_JS" dist/index.html
+          grep -q "./$APP_CSS" dist/index.html
+          grep -q './vendor/supabase-2.49.8.min.js' dist/index.html
+          ! grep -q 'qrcode-1.5.1.min.js' dist/index.html
+          grep -q '7.8-lite' "dist/$APP_JS"
+          grep -q 'Rondas por turno' "dist/$APP_JS"
+          grep -q 'El supervisor no tiene turno fijo' "dist/$APP_JS"
+          grep -q 'No se suman los tres turnos en un único número' "dist/$APP_JS"
+          grep -q 'qrcode-1.5.1.min.js' "dist/$APP_JS"
+          test -s dist/vendor/qrcode-1.5.1.min.js
+          test -s dist/vendor/jsqr-1.4.0.min.js
+          ! grep -q 'raw.githubusercontent.com' dist/index.html
+          ! grep -q 'cdn.jsdelivr.net' dist/index.html
+      - name: Build size report
+        run: |
+          set -e
+          APP_JS=$(cat .build/app-js-name)
+          APP_CSS=$(cat .build/app-css-name)
+          {
+            echo 'CALEGO Control Integral V7.9 Lite build sizes'
+            wc -c dist/index.html "dist/$APP_CSS" "dist/$APP_JS" dist/vendor/supabase-2.49.8.min.js dist/vendor/qrcode-1.5.1.min.js dist/vendor/jsqr-1.4.0.min.js
+            echo ''
+            echo 'Initial-load gzip estimates (bytes)'
+            for f in dist/index.html "dist/$APP_CSS" "dist/$APP_JS" dist/vendor/supabase-2.49.8.min.js; do printf '%s ' "$f"; gzip -9 -c "$f" | wc -c; done
+            echo 'QRCode 1.5.1 and jsQR 1.4.0 are lazy-loaded and excluded from normal initial load.'
+            echo "JS_ASSET=$APP_JS"
+            echo "CSS_ASSET=$APP_CSS"
+          } > dist/build-stats.txt
+          cat dist/build-stats.txt
+      - name: Commit generated Lite bundle
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A dist
+          if ! git diff --cached --quiet; then
+            git commit -m 'build: refresh V7 Lite hashed bundle [skip ci]'
+            git push
+          fi

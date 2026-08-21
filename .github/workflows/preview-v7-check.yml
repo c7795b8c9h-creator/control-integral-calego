@@ -1,0 +1,74 @@
+name: Preview V7 check
+on:
+  push:
+    branches: [preview-v7]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check JavaScript syntax
+        run: |
+          node --check assets/preview-photo-v7.js
+          node --check assets/preview-dashboard-v7.js
+          node --check assets/preview-dashboard-v7-1.js
+          node --check assets/preview-dashboard-v7-2.js
+          node --check assets/preview-dashboard-v7-5.js
+          node --check assets/preview-flow-v7.js
+          node --check assets/preview-matrix-v7-3.js
+          node --check assets/preview-matrix-v7-4.js
+          node --check assets/preview-curation-v7-6.js
+          node --check assets/preview-architecture-v7-7.js
+          node --check assets/preview-performance-v7-8.js
+          node --check assets/preview-dashboard-v7-9.js
+          node --check scripts/build-lite-html.mjs
+      - name: Check preview files
+        run: |
+          test -s dist/index.html
+          test -s dist/build-stats.txt
+          test -s assets/preview-v7.css
+          test -s assets/preview-dashboard-v7-1.css
+          test -s assets/preview-matrix-v7-3.css
+          test -s assets/preview-matrix-v7-4.css
+          test -s assets/preview-curation-v7-6.css
+          test -s assets/preview-architecture-v7-7.css
+          test -s assets/preview-dashboard-v7-9.css
+          grep -q 'PREVIEW V7' assets/preview-photo-v7.js
+          grep -q 'Guardar y seguir' assets/preview-flow-v7.js
+          grep -q 'strictDashboardScope' assets/preview-dashboard-v7-5.js
+          grep -q 'Puntos / equipos activos' assets/preview-curation-v7-6.js
+          grep -q '7.7-lite' assets/preview-architecture-v7-7.js
+          grep -q '7.8-lite' assets/preview-performance-v7-8.js
+          grep -q 'Rondas por turno' assets/preview-dashboard-v7-9.js
+          grep -q 'fetchObservationAnswers' assets/preview-performance-v7-8.js
+          grep -q 'loadQrCodeGenerator' assets/preview-performance-v7-8.js
+          test -s docs/ARCHITECTURE_V7_LITE.md
+          test -s docs/PERFORMANCE_MIGRATION_PROPOSED.sql
+  deploy_preview:
+    if: github.event_name != 'pull_request'
+    needs: check
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - name: Build preview site
+        run: |
+          rm -rf _site
+          mkdir -p _site
+          cp -R dist/. _site/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy preview
+        id: deployment
+        uses: actions/deploy-pages@v4
