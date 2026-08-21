@@ -1,0 +1,73 @@
+name: Build V7 Lite
+on:
+  push:
+    branches: [preview-v7]
+permissions:
+  contents: write
+jobs:
+  build:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build consolidated assets
+        run: |
+          set -e
+          mkdir -p .build dist/vendor
+          cat \
+            assets/app.js \
+            assets/admin-hotfix.js \
+            assets/preview-photo-v7.js \
+            assets/preview-dashboard-v7.js \
+            assets/preview-dashboard-v7-1.js \
+            assets/preview-dashboard-v7-2.js \
+            assets/preview-dashboard-v7-5.js \
+            assets/preview-flow-v7.js \
+            assets/preview-matrix-v7-3.js \
+            assets/preview-matrix-v7-4.js \
+            assets/preview-curation-v7-6.js \
+            assets/preview-architecture-v7-7.js > .build/app.bundle.js
+          cat \
+            assets/style.css \
+            assets/preview-v7.css \
+            assets/preview-dashboard-v7-1.css \
+            assets/preview-matrix-v7-3.css \
+            assets/preview-matrix-v7-4.css \
+            assets/preview-curation-v7-6.css \
+            assets/preview-architecture-v7-7.css > .build/app.bundle.css
+          npx --yes esbuild@0.25.9 .build/app.bundle.js --minify --target=es2019 --charset=utf8 --outfile=dist/app.v7.min.js
+          npx --yes esbuild@0.25.9 .build/app.bundle.css --minify --outfile=dist/app.v7.min.css
+          curl -fsSL https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.min.js -o dist/vendor/supabase.min.js
+          curl -fsSL https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js -o dist/vendor/qrcode.min.js
+          curl -fsSL https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js -o .build/jsqr.js
+          npx --yes esbuild@0.25.9 .build/jsqr.js --minify --target=es2019 --outfile=dist/vendor/jsqr.min.js
+          node scripts/build-lite-html.mjs
+      - name: Validate Lite build
+        run: |
+          set -e
+          node --check dist/app.v7.min.js
+          grep -q './app.v7.min.js' dist/index.html
+          grep -q './app.v7.min.css' dist/index.html
+          grep -q './vendor/supabase.min.js' dist/index.html
+          grep -q '7.7-lite' dist/app.v7.min.js
+          test -s dist/vendor/jsqr.min.js
+      - name: Build size report
+        run: |
+          {
+            echo 'CALEGO Control Integral V7 Lite build sizes'
+            wc -c dist/index.html dist/app.v7.min.css dist/app.v7.min.js dist/vendor/supabase.min.js dist/vendor/qrcode.min.js dist/vendor/jsqr.min.js
+            echo ''
+            echo 'Gzip estimates (bytes)'
+            for f in dist/index.html dist/app.v7.min.css dist/app.v7.min.js dist/vendor/supabase.min.js dist/vendor/qrcode.min.js; do printf '%s ' "$f"; gzip -9 -c "$f" | wc -c; done
+            echo 'jsQR is lazy-loaded and excluded from normal initial load.'
+          } > dist/build-stats.txt
+          cat dist/build-stats.txt
+      - name: Commit generated Lite bundle
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add dist
+          if ! git diff --cached --quiet; then
+            git commit -m 'build: refresh V7 Lite bundle [skip ci]'
+            git push
+          fi
