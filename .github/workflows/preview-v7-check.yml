@@ -7,6 +7,8 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  pages: write
+  id-token: write
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -24,3 +26,23 @@ jobs:
           grep -q 'PREVIEW V7' assets/preview-photo-v7.js
           grep -q 'Guardar y seguir' assets/preview-flow-v7.js
           grep -q 'Rondas para auditar' assets/preview-dashboard-v7.js
+  deploy_preview:
+    if: github.event_name != 'pull_request'
+    needs: check
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - name: Build preview site
+        run: |
+          mkdir -p _site
+          cp preview.html _site/index.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy preview
+        id: deployment
+        uses: actions/deploy-pages@v4
