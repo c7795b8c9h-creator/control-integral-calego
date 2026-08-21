@@ -2,6 +2,8 @@ name: Preview V7 check
 on:
   push:
     branches: [preview-v7]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
