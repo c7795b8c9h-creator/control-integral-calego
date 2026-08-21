@@ -1,0 +1,13 @@
+/* V7.7 Lite runtime */
+img{max-width:100%;height:auto}
+.evidence-card img{content-visibility:auto}
+@supports(content-visibility:auto){
+  #page-dashboard .card,#page-matrix .mx-area,#page-users .user-card{content-visibility:auto;contain-intrinsic-size:260px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+@media(max-width:760px){
+  .main{contain:layout style}
+  .page.active{contain:layout style}
+  .evidence-thumb{contain:layout paint}
+  .qr-video{max-height:45vh}
+}
