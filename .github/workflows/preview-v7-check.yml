@@ -57,7 +57,7 @@ jobs:
           test -s docs/ARCHITECTURE_V7_LITE.md
           test -s docs/PERFORMANCE_MIGRATION_PROPOSED.sql
   deploy_preview:
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && github.ref_name == 'preview-v7'
     needs: check
     runs-on: ubuntu-latest
     environment:
