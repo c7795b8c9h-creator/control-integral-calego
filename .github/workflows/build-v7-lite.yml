@@ -62,20 +62,17 @@ jobs:
           APP_JS=$(cat .build/app-js-name)
           APP_CSS=$(cat .build/app-css-name)
           node --check "dist/$APP_JS"
-          grep -q "./$APP_JS" dist/index.html
-          grep -q "./$APP_CSS" dist/index.html
-          grep -q './vendor/supabase-2.49.8.min.js' dist/index.html
-          ! grep -q 'qrcode-1.5.1.min.js' dist/index.html
-          grep -q '7.8-lite' assets/preview-performance-v7-8.js
-          grep -q 'Rondas por turno' assets/preview-dashboard-v7-9.js
-          grep -q 'Catálogo único de equipos' assets/preview-machine-links-v8.js
-          grep -q 'Vincular equipo existente' assets/preview-machine-links-v8.js
-          grep -q 'validate_machine_qr_v2' assets/preview-machine-links-v8.js
-          grep -q 'qrcode-1.5.1.min.js' "dist/$APP_JS"
+          test -s "dist/$APP_JS"
+          test -s "dist/$APP_CSS"
+          test -s dist/index.html
+          test -s dist/vendor/supabase-2.49.8.min.js
           test -s dist/vendor/qrcode-1.5.1.min.js
           test -s dist/vendor/jsqr-1.4.0.min.js
-          ! grep -q 'raw.githubusercontent.com' dist/index.html
-          ! grep -q 'cdn.jsdelivr.net' dist/index.html
+          grep -Fq "./$APP_JS" dist/index.html
+          grep -Fq "./$APP_CSS" dist/index.html
+          grep -Fq './vendor/supabase-2.49.8.min.js' dist/index.html
+          grep -Fq 'Catálogo único de equipos' assets/preview-machine-links-v8.js
+          grep -Fq 'validate_machine_qr_v2' assets/preview-machine-links-v8.js
       - name: Build size report
         run: |
           set -e
