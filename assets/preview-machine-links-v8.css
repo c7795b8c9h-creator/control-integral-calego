@@ -1,0 +1,18 @@
+
+/* V8 · catálogo físico único / vínculos equipo-línea */
+.mx-line-actions{gap:6px;flex-wrap:wrap}
+.mx-row-actions{gap:6px;flex-wrap:wrap}
+.machine-link-note{font-size:11px;color:var(--muted)}
+#machineLinkDialog select{width:100%}
+.round-split-kpi{grid-column:span 2}
+.round-shift-split{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}
+.round-shift-card{border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--soft)}
+.round-shift-card span,.round-shift-card small{display:block;font-size:10px;color:var(--muted)}
+.round-shift-card b{display:block;font-size:18px;color:var(--navy);margin:2px 0}
+@media(max-width:760px){
+  .round-split-kpi{grid-column:1/-1}
+  .round-shift-split{grid-template-columns:repeat(3,minmax(72px,1fr));gap:5px}
+  .round-shift-card{padding:7px 5px;text-align:center}
+  .round-shift-card b{font-size:15px}
+  .mx-line-actions .btn{flex:1 1 145px}
+}
