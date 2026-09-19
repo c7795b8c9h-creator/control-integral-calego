@@ -180,8 +180,8 @@
       const mod=moduleById(moduleId),name=promptText('Nombre del equipo nuevo');if(!name)return;
       const prefix=String(mod?.prefix||'EQ').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,5)||'EQ';
       let n=1,code=prefix+'-'+n;while(S.machines.some(m=>String(m.code).toUpperCase()===code)){n++;code=prefix+'-'+n}
-      const machine=await must(db.from('machines').insert({module_id:moduleId,code,name,active:true,sort_order:n}).select('*').single());
-      await must(db.from('machine_module_links').insert({machine_id:machine.id,module_id:moduleId,active:true,sort_order:n}));
+      const {data,error}=await db.rpc('manager_create_linked_machine',{p_module_id:moduleId,p_code:code,p_name:name,p_sort_order:n});
+      if(error)throw error;
       await refreshMatrix('Equipo físico creado con un único QR.');
     }catch(e){fail(e,'Equipo')}
   };
