@@ -1,5 +1,7 @@
 name: V7 Lite browser smoke
 on:
+  push:
+    branches: [preview-machine-links]
   pull_request:
     branches: [main]
   workflow_dispatch:
