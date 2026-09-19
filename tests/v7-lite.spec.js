@@ -11,9 +11,10 @@ for(const vp of viewports){
     const errors=[];
     page.on('pageerror',e=>errors.push(String(e.message||e)));
     await page.goto('http://127.0.0.1:4173',{waitUntil:'domcontentloaded'});
-    await expect(page).toHaveTitle(/V7 Lite/);
+    await expect(page).toHaveTitle(/V8/);
     await expect(page.locator('#loginUser')).toBeVisible();
     await expect(page.locator('#loginPass')).toBeVisible();
+    expect(await page.evaluate(()=>!!window.ML && typeof window.mxOpenLinkMachine==='function')).toBeTruthy();
     await page.locator('#loginUser').fill('prueba');
     await page.locator('#loginPass').fill('12345678');
     const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2);
