@@ -21,5 +21,7 @@ for(const vp of viewports){
     const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2);
     expect(overflow).toBeFalsy();
     expect(errors).toEqual([]);
+    const js=await page.locator('script[src*="app."]').getAttribute('src');
+    expect(js).toMatch(/app\.[a-f0-9]{10}\.min\.js/);
   });
 }
