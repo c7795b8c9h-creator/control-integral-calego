@@ -21,8 +21,8 @@ for(const vp of viewports){
     expect(overflow).toBeFalsy();
     const hasV8=await page.evaluate(()=>document.documentElement.innerHTML.includes('Vincular equipo existente')||document.documentElement.innerHTML.includes('Catálogo único de equipos'));\n    expect(hasV8).toBeTruthy();\n    const v8=await page.evaluate(()=>typeof window.ML==='object');
     expect(v8).toBeTruthy();
-    const appText=await page.locator('body').innerText();
-    expect(appText.includes('Vincular equipo existente') || appText.includes('Catálogo único de equipos') || true).toBeTruthy();
+    const v8Loaded=await page.evaluate(()=>!!window.ML && typeof window.ML.isLinked==='function');
+    expect(v8Loaded).toBeTruthy();
     expect(errors).toEqual([]);
   });
 }
