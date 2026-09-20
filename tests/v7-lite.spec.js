@@ -19,6 +19,6 @@ for(const vp of viewports){
     await page.locator('#loginPass').fill('12345678');
     const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2);
     expect(overflow).toBeFalsy();
-    expect(errors).toEqual([]);
+    const hasV8=await page.evaluate(()=>document.documentElement.innerHTML.includes('Vincular equipo existente')||document.documentElement.innerHTML.includes('Catálogo único de equipos'));\n    expect(hasV8).toBeTruthy();\n    expect(errors).toEqual([]);
   });
 }
