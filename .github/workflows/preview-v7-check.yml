@@ -1,7 +1,7 @@
 name: Preview V7 check
 on:
   push:
-    branches: [preview-v7]
+    branches: [preview-v7, preview-machine-links]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -28,6 +28,7 @@ jobs:
           node --check assets/preview-architecture-v7-7.js
           node --check assets/preview-performance-v7-8.js
           node --check assets/preview-dashboard-v7-9.js
+          node --check assets/preview-machine-links-v8.js
           node --check scripts/build-lite-html.mjs
       - name: Check preview files
         run: |
@@ -40,6 +41,7 @@ jobs:
           test -s assets/preview-curation-v7-6.css
           test -s assets/preview-architecture-v7-7.css
           test -s assets/preview-dashboard-v7-9.css
+          test -s assets/preview-machine-links-v8.css
           grep -q 'PREVIEW V7' assets/preview-photo-v7.js
           grep -q 'Guardar y seguir' assets/preview-flow-v7.js
           grep -q 'strictDashboardScope' assets/preview-dashboard-v7-5.js
@@ -47,12 +49,15 @@ jobs:
           grep -q '7.7-lite' assets/preview-architecture-v7-7.js
           grep -q '7.8-lite' assets/preview-performance-v7-8.js
           grep -q 'Rondas por turno' assets/preview-dashboard-v7-9.js
+          grep -q 'Catálogo único de equipos' assets/preview-machine-links-v8.js
+          grep -q 'Vincular equipo existente' assets/preview-machine-links-v8.js
+          grep -q 'validate_machine_qr_v2' assets/preview-machine-links-v8.js
           grep -q 'fetchObservationAnswers' assets/preview-performance-v7-8.js
           grep -q 'loadQrCodeGenerator' assets/preview-performance-v7-8.js
           test -s docs/ARCHITECTURE_V7_LITE.md
           test -s docs/PERFORMANCE_MIGRATION_PROPOSED.sql
   deploy_preview:
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && github.ref_name == 'preview-v7'
     needs: check
     runs-on: ubuntu-latest
     environment:
