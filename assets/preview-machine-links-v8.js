@@ -345,4 +345,19 @@
     $('analysisContent').innerHTML='<div class="priority-item '+(open?'high':'')+'"><strong>'+open+' hallazgo(s) abierto(s)</strong><span>Respeta Área, Responsable, Turno y línea de revisión.</span></div><div class="priority-item '+(missing?'medium':'')+'"><strong>'+missing+' evidencia(s) aleatoria(s) pendiente(s)</strong></div>';
     $('analysisDialog').showModal();
   };
+
+  // El QR identifica al equipo físico. El escaneo guarda también la línea de
+  // revisión para saber si se usó desde Producción, Mantenimiento, Calidad, etc.
+  loadQrAudit=window.loadQrAudit=async function(){
+    if(!isManager()||!$('qrAuditTable'))return;
+    try{
+      S.qrAudit=await must(db.from('qr_scans').select('*').order('scanned_at',{ascending:false}).limit(100));
+      $('qrAuditTable').innerHTML='<table class="data-table"><thead><tr><th>Fecha / hora</th><th>Equipo físico</th><th>Área / línea</th><th>Responsable</th><th>Turno</th><th>Método</th><th>Dispositivo</th></tr></thead><tbody>'+S.qrAudit.map(x=>{
+        const m=machineById(x.machine_id),mod=moduleById(x.module_id),area=mod?moduleArea(mod.id):null,u=byId(S.profiles,x.user_id);
+        return '<tr><td>'+new Date(x.scanned_at).toLocaleString('es-CO')+'</td><td><b>'+esc(m?.name||'-')+'</b><br><small>'+esc(m?.code||'')+'</small></td><td>'+esc(area?.name||'Histórico')+(mod?' / '+esc(mod.name):'')+'</td><td>'+esc(u?.full_name||'-')+'</td><td>T'+x.shift+'</td><td>'+esc(x.method||'-')+'</td><td><small>'+esc((x.device||'').slice(0,90))+'</small></td></tr>';
+      }).join('')+'<tr class="qr-empty-row" style="display:'+(S.qrAudit.length?'none':'table-row')+'"><td colspan="7">Sin escaneos registrados.</td></tr></tbody></table>';
+    }catch(e){
+      $('qrAuditTable').innerHTML='<div class="notice">No fue posible cargar la trazabilidad QR.</div>';console.error(e);
+    }
+  };
 })();
