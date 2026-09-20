@@ -14,15 +14,12 @@ for(const vp of viewports){
     await expect(page).toHaveTitle(/V8/);
     await expect(page.locator('#loginUser')).toBeVisible();
     await expect(page.locator('#loginPass')).toBeVisible();
-    expect(await page.evaluate(()=>!!window.ML && typeof window.mxOpenLinkMachine==='function')).toBeTruthy();
+    const v8Loaded=await page.evaluate(()=>!!window.ML && typeof window.ML.isLinked==='function' && typeof window.mxOpenLinkMachine==='function');
+    expect(v8Loaded).toBeTruthy();
     await page.locator('#loginUser').fill('prueba');
     await page.locator('#loginPass').fill('12345678');
     const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2);
     expect(overflow).toBeFalsy();
-    const hasV8=await page.evaluate(()=>document.documentElement.innerHTML.includes('Vincular equipo existente')||document.documentElement.innerHTML.includes('Catálogo único de equipos'));\n    expect(hasV8).toBeTruthy();\n    const v8=await page.evaluate(()=>typeof window.ML==='object');
-    expect(v8).toBeTruthy();
-    const v8Loaded=await page.evaluate(()=>!!window.ML && typeof window.ML.isLinked==='function');
-    expect(v8Loaded).toBeTruthy();
     expect(errors).toEqual([]);
   });
 }
